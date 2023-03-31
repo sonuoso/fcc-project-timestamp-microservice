@@ -18,10 +18,29 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+app.get("/api/:dateTime", function(req, res) {
+  let utcDate;
+  let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+  //Parsing timestamp from string to number and converting ts or route parameter to a Date object
+  if ((req.params.dateTime).length > 10) {
+    let ts = +(req.params.dateTime);
+    utcDate = new Date(ts)
+  } else {
+    utcDate = new Date(req.params.dateTime)
+  }
+
+  //Adding 0 before a digit
+  function addZero(x) {
+    if (x < 10) {
+      x = "0" + x;
+      return x;
+    }
+  }
+  
+  res.json({ "unix": utcDate.getTime(), "utc": days[(utcDate.getDay() - 1)] + "," + " " + utcDate.getDate() + " " + months[utcDate.getMonth()] + " " + utcDate.getFullYear() + " " + addZero(utcDate.getHours()) + ":" + addZero(utcDate.getMinutes()) + ":" + addZero(utcDate.getSeconds()) + " GMT" });
 });
 
 
