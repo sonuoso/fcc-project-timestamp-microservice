@@ -19,28 +19,30 @@ app.get("/", function (req, res) {
 });
 
 // your first API endpoint... 
-app.get("/api/:dateTime", function(req, res) {
-  let utcDate;
-  let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-  //Parsing timestamp from string to number and converting ts or route parameter to a Date object
-  if ((req.params.dateTime).length > 10) {
-    let ts = +(req.params.dateTime);
-    utcDate = new Date(ts)
-  } else {
-    utcDate = new Date(req.params.dateTime)
-  }
-
-  //Adding 0 before a digit
-  function addZero(x) {
-    if (x < 10) {
-      x = "0" + x;
-      return x;
+app.get("/api/:date?", function(req, res) {
+  let newDate;
+  let nowDate;
+  //Checking if date parameter is true and a valid timestamp before assigning to response json object
+  if (req.params.date) {
+    newDate = new Date(req.params.date)
+    if (isNaN(Date.parse(newDate))) {
+      newDate = new Date(+(req.params.date))
+      if (isNaN(Date.parse(newDate))) {
+        res.json({ error: "Invalid Date" })
+      }
+      else {
+        res.json({ unix: newDate.getTime(), utc: newDate.toUTCString() });
+      }
+    }
+    else {
+      res.json({ unix: newDate.getTime(), utc: newDate.toUTCString() });
     }
   }
-  
-  res.json({ "unix": utcDate.getTime(), "utc": days[(utcDate.getDay() - 1)] + "," + " " + utcDate.getDate() + " " + months[utcDate.getMonth()] + " " + utcDate.getFullYear() + " " + addZero(utcDate.getHours()) + ":" + addZero(utcDate.getMinutes()) + ":" + addZero(utcDate.getSeconds()) + " GMT" });
+  else {
+    //Using current timestamp if the date paaremter is empty
+    nowDate = new Date();
+    res.json({ unix: nowDate.getTime(), utc: nowDate.toUTCString() })
+  }
 });
 
 
